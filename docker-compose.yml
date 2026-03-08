@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16
+    container_name: queryshield_db
+    environment:
+      POSTGRES_DB: queryshield
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: queryshield_api
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/queryshield
+      SECRET_KEY: change-this-to-a-long-random-string
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      HIGH_RISK_THRESHOLD: 70
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
