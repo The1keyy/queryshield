@@ -1,6 +1,6 @@
 # QueryShield 🛡️
 
-> **SQL Injection Risk Analysis API** — A backend security service that analyzes SQL query strings, detects suspicious injection patterns, assigns a risk score, and stores results for review through authenticated API endpoints.
+> **SQL Injection Risk Analysis API + Web UI** — A full-stack security service that analyzes SQL query strings, detects suspicious injection patterns, assigns a risk score, and surfaces results through authenticated API endpoints and a React dashboard.
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110-green?logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -43,6 +43,7 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 | Layer | Technology |
 |---|---|
 | **Backend** | Python, FastAPI |
+| **Frontend** | React, TypeScript, Vite, Tailwind CSS |
 | **Database** | PostgreSQL, SQLAlchemy ORM |
 | **Auth** | JWT (python-jose), Passlib (bcrypt) |
 | **Infrastructure** | Docker, Docker Compose |
@@ -58,6 +59,8 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 - **Risk Scoring System** — Assigns numeric scores and severity levels (`low`, `medium`, `high`, `critical`) based on matched detection rules
 - **Query Logging** — Stores every analyzed query in PostgreSQL, tied to the authenticated user
 - **Protected Endpoints** — History retrieval and high-risk filtering behind auth middleware
+- **Modern Web Dashboard** — React + Tailwind UI that lets you sign up, log in, paste queries, view live analysis, and browse history/high-risk queries
+- *UX** — Clear navigation, color-coded severity badges, and thoughtful empty/loading/error states that showcase practical product thinking
 - **Containerized Deployment** — Full Docker Compose stack with persistent PostgreSQL volume
 - **Cloud Hosted** — Live on AWS EC2, accessible via public IP
 
@@ -114,18 +117,60 @@ Structured JSON Response → Client
 git clone https://github.com/The1keyy/queryshield.git
 cd queryshield
 
-# Set up virtual environment
+# Set up Python virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Install dependencies
+# Install backend dependencies
 pip install -r requirements.txt
 
-# Run the API
+# Run the API (FastAPI + PostgreSQL)
 uvicorn app.main:app --reload
 ```
 
 Visit the interactive docs at: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+---
+
+## Web UI (React + Tailwind)
+
+On top of the API, QueryShield ships with a small **frontend dashboard** non-technical users can try without writing any code.
+
+### Screens
+
+- **Landing Page** — High-level overview with an example analysis and calls-to-action (“Try live analyzer”, “View API docs”)
+- **Auth** — Email + password registration and login, backed by the same JWT auth used by the API
+- **Live Analyzer** — Paste a SQL query, run analysis, and see:
+  - Color-coded severity (`low`, `medium`, `high`, `critical`)
+  - Risk score out of 100
+  - Matched rule flags (e.g. `OR_ALWAYS_TRUE`, `COMMENT_INJECTION`)
+  - Human-readable summary of why the query is risky
+- **History** — Table of all your past analyses with timestamps, severities, scores, query preview, and flags
+- **High-Risk Only** — Focused view of queries whose scores exceed the configured `high_risk_threshold`
+
+### Frontend local setup
+
+In a second terminal, from the project root:
+
+```bash
+cd frontend
+
+# Install frontend dependencies
+npm install
+
+# Point the UI at your local API (optional if you keep defaults)
+echo 'VITE_API_URL=http://127.0.0.1:8000' > .env
+
+# Run the React dev server
+npm run dev
+```
+
+Then open the UI at `http://127.0.0.1:5173`:
+
+1. **Register** a new account in the UI (or via `/auth/register`)
+2. **Login** to receive a JWT stored in the browser
+3. Use the **Live Analyzer** to inspect queries
+4. Explore **History** and **High-Risk** views to see persisted results
 
 ---
 
