@@ -12,7 +12,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   api:
-    build: .
+    image: queryshield
     container_name: queryshield_api
     depends_on:
       - db
