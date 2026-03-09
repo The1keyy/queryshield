@@ -153,18 +153,6 @@ QueryShield is live on an **AWS EC2** instance:
 5. Open port `8000` via EC2 security group
 
 Access live API docs: `http://EC2_PUBLIC_IP:8000/docs`
-
----
-
-## What's Next
-
-- Machine learning–based anomaly detection for novel attack patterns
-- Advanced SQL AST (Abstract Syntax Tree) parsing
-- Role-based access control (RBAC)
-- Rate limiting and abuse prevention
-- Query visualization dashboard
-- SIEM integration and audit logging pipeline
-
 ---
 
 ## About
