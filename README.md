@@ -1,6 +1,9 @@
+
+Copy
+
 # QueryShield 🛡️
 
-> **SQL Injection Risk Analysis API** — A backend security tool that detects and scores SQL injection patterns before query execution.
+> **SQL Injection Risk Analysis API** — A backend security service that analyzes SQL query strings, detects suspicious injection patterns, assigns a risk score, and stores results for review through authenticated API endpoints.
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110-green?logo=fastapi)](https://fastapi.tiangolo.com/)
@@ -13,7 +16,9 @@
 
 ## What It Does
 
-SQL injection is one of the most common and dangerous web vulnerabilities. QueryShield acts as a **pre-execution inspection layer** — intercepting SQL queries, detecting malicious patterns, and returning a structured risk report before any damage is done.
+SQL injection is one of the most common and dangerous vulnerabilities in web applications. QueryShield acts as a **pre-execution inspection layer** — analyzing SQL query strings before they are executed and returning a structured security risk report.
+
+The system inspects queries for suspicious constructs, assigns weighted scores, and classifies severity levels.
 
 **Example attack query caught by QueryShield:**
 ```sql
@@ -23,10 +28,14 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 **QueryShield response:**
 ```json
 {
+  "id": 1,
+  "query_text": "SELECT * FROM users WHERE username = 'admin' OR 1=1 --",
   "risk_score": 60,
   "severity": "high",
-  "flags": ["OR_ALWAYS_TRUE", "COMMENT_INJECTION"],
-  "analysis_summary": "Multiple indicators consistent with injection behavior"
+  "flags": "OR_ALWAYS_TRUE,COMMENT_INJECTION",
+  "analysis_summary": "Multiple indicators consistent with injection behavior",
+  "created_at": "2026-03-09T03:39:11.208111",
+  "user_id": 1
 }
 ```
 
@@ -38,7 +47,7 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 |---|---|
 | **Backend** | Python, FastAPI |
 | **Database** | PostgreSQL, SQLAlchemy ORM |
-| **Auth** | JWT, Passlib (bcrypt) |
+| **Auth** | JWT (python-jose), Passlib (bcrypt) |
 | **Infrastructure** | Docker, Docker Compose |
 | **Cloud** | AWS EC2 |
 | **API Tooling** | Uvicorn, Pydantic |
@@ -48,8 +57,8 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 ## Key Features
 
 - **JWT Authentication** — Secure user registration and login with token-based access control
-- **SQL Risk Analysis Engine** — Detects always-true conditions, comment injections, UNION-based attacks, and more
-- **Risk Scoring System** — Assigns numeric scores and severity levels (`low`, `medium`, `high`) to analyzed queries
+- **SQL Risk Analysis Engine** — Detects injection indicators such as always-true conditions, comment truncation, UNION-based attacks, and suspicious schema enumeration
+- **Risk Scoring System** — Assigns numeric scores and severity levels (`low`, `medium`, `high`, `critical`) based on matched detection rules
 - **Query Logging** — Stores every analyzed query in PostgreSQL, tied to the authenticated user
 - **Protected Endpoints** — History retrieval and high-risk filtering behind auth middleware
 - **Containerized Deployment** — Full Docker Compose stack with persistent PostgreSQL volume
@@ -64,13 +73,14 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 |---|---|---|
 | `POST` | `/auth/register` | Create a new user account |
 | `POST` | `/auth/login` | Authenticate and receive a JWT |
+| `POST` | `/auth/token` | OAuth2 token endpoint used by Swagger UI |
 
 ### Query Analysis
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/queries/analyze` | Analyze a SQL query for injection patterns |
-| `GET` | `/queries/` | Get all analyzed queries for the current user |
-| `GET` | `/queries/high-risk` | Filter queries flagged as high risk |
+| `POST` | `/query/analyze` | Analyze a SQL query and store the result |
+| `GET` | `/query` | Retrieve all stored analyses |
+| `GET` | `/query/high-risk` | Retrieve only high-risk queries |
 
 ---
 
@@ -78,18 +88,23 @@ SELECT * FROM users WHERE username = 'admin' OR 1=1 --
 
 ```
 Client Request
-     ↓
+      │
+      ▼
 JWT Authentication Middleware
-     ↓
-POST /queries/analyze
-     ↓
+      │
+      ▼
+POST /query/analyze
+      │
+      ▼
 SQL Risk Analysis Engine
-  ├── Pattern Matching (OR 1=1, UNION, --, etc.)
-  ├── Risk Score Calculation
-  └── Severity Classification
-     ↓
+   ├── Pattern Detection
+   ├── Risk Score Calculation
+   └── Severity Classification
+      │
+      ▼
 Store Result → PostgreSQL
-     ↓
+      │
+      ▼
 Structured JSON Response → Client
 ```
 
@@ -144,23 +159,12 @@ Access live API docs: `http://EC2_PUBLIC_IP:8000/docs`
 
 ---
 
-## What's Next
-
-- Machine learning–based anomaly detection for novel attack patterns
-- Advanced SQL AST (Abstract Syntax Tree) parsing
-- Role-based access control (RBAC)
-- Rate limiting and abuse prevention
-- Query visualization dashboard
-- SIEM integration and audit logging pipeline
-
----
-
 ## About
 
-Built by **Keyshawn Jeannot** — Computer Science student at UMass Boston, focused on backend engineering and defensive security.
+Built by **Keyshawn Jeannot** — Computer Science student at UMass Boston, focused on backend engineering, cloud infrastructure, and defensive security systems.
 
 [GitHub](https://github.com/The1keyy) · [LinkedIn](https://www.linkedin.com/in/keyshawnjeannot)
 
 ---
 
-*QueryShield was built to demonstrate backend API architecture, secure authentication, database design, containerized deployment, and cloud infrastructure — applied to a real-world security problem.*
+*QueryShield demonstrates backend API architecture, secure authentication design, database modeling and persistence, containerized deployment, and cloud infrastructure workflows — applied to a real-world security problem.*
